@@ -217,6 +217,7 @@ type (
 	ULONG_PTR       uintptr
 	WPARAM          uintptr
 	TRACEHANDLE     uintptr
+	LPWSTR          uintptr
 )
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/dd162805.aspx
@@ -916,6 +917,31 @@ type VsFIXEDFILEINFO struct {
 	FileDateMS       uint32
 	FileDateLS       uint32
 }
+
+type INET_FIREWALL_AC_CAPABILITIES struct {
+	count        DWORD
+	capabilities uintptr
+}
+type PINET_FIREWALL_AC_CAPABILITIES = *INET_FIREWALL_AC_CAPABILITIES
+
+type INET_FIREWALL_AC_BINARIES struct {
+	count    DWORD
+	binaries *LPWSTR
+}
+type PINET_FIREWALL_AC_BINARIES = *INET_FIREWALL_AC_BINARIES
+
+type INET_FIREWALL_APP_CONTAINER struct {
+	appContainerSid  uintptr
+	userSid          uintptr
+	appContainerName LPWSTR
+	displayName      LPWSTR
+	description      LPWSTR
+	capabilities     INET_FIREWALL_AC_CAPABILITIES
+	binaries         INET_FIREWALL_AC_BINARIES
+	workingDirectory LPWSTR
+	packageFullName  LPWSTR
+}
+type PINET_FIREWALL_APP_CONTAINER = *INET_FIREWALL_APP_CONTAINER
 
 type HOOKPROC func(int, WPARAM, LPARAM) LRESULT
 
