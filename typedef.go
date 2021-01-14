@@ -919,27 +919,27 @@ type VsFIXEDFILEINFO struct {
 }
 
 type INET_FIREWALL_AC_CAPABILITIES struct {
-	count        DWORD
-	capabilities uintptr
+	Count        DWORD
+	Capabilities uintptr
 }
 type PINET_FIREWALL_AC_CAPABILITIES = *INET_FIREWALL_AC_CAPABILITIES
 
 type INET_FIREWALL_AC_BINARIES struct {
-	count    DWORD
-	binaries *LPWSTR
+	Count    DWORD
+	Binaries *LPWSTR
 }
 type PINET_FIREWALL_AC_BINARIES = *INET_FIREWALL_AC_BINARIES
 
 type INET_FIREWALL_APP_CONTAINER struct {
-	appContainerSid  uintptr
-	userSid          uintptr
-	appContainerName LPWSTR
-	displayName      LPWSTR
-	description      LPWSTR
-	capabilities     INET_FIREWALL_AC_CAPABILITIES
-	binaries         INET_FIREWALL_AC_BINARIES
-	workingDirectory LPWSTR
-	packageFullName  LPWSTR
+	AppContainerSid  uintptr
+	UserSid          uintptr
+	AppContainerName LPWSTR
+	DisplayName      LPWSTR
+	Description      LPWSTR
+	Capabilities     INET_FIREWALL_AC_CAPABILITIES
+	Binaries         INET_FIREWALL_AC_BINARIES
+	WorkingDirectory LPWSTR
+	PackageFullName  LPWSTR
 }
 type PINET_FIREWALL_APP_CONTAINER = *INET_FIREWALL_APP_CONTAINER
 
