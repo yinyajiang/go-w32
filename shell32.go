@@ -14,14 +14,15 @@ import (
 var (
 	modshell32 = syscall.NewLazyDLL("shell32.dll")
 
-	procSHBrowseForFolder   = modshell32.NewProc("SHBrowseForFolderW")
-	procSHGetPathFromIDList = modshell32.NewProc("SHGetPathFromIDListW")
-	procDragAcceptFiles     = modshell32.NewProc("DragAcceptFiles")
-	procDragQueryFile       = modshell32.NewProc("DragQueryFileW")
-	procDragQueryPoint      = modshell32.NewProc("DragQueryPoint")
-	procDragFinish          = modshell32.NewProc("DragFinish")
-	procShellExecute        = modshell32.NewProc("ShellExecuteW")
-	procExtractIcon         = modshell32.NewProc("ExtractIconW")
+	procSHBrowseForFolder       = modshell32.NewProc("SHBrowseForFolderW")
+	procSHGetPathFromIDList     = modshell32.NewProc("SHGetPathFromIDListW")
+	procDragAcceptFiles         = modshell32.NewProc("DragAcceptFiles")
+	procDragQueryFile           = modshell32.NewProc("DragQueryFileW")
+	procDragQueryPoint          = modshell32.NewProc("DragQueryPoint")
+	procDragFinish              = modshell32.NewProc("DragFinish")
+	procShellExecute            = modshell32.NewProc("ShellExecuteW")
+	procExtractIcon             = modshell32.NewProc("ExtractIconW")
+	procSHGetSpecialFolderPathW = modshell32.NewProc("SHGetSpecialFolderPathW")
 )
 
 func SHBrowseForFolder(bi *BROWSEINFO) uintptr {
@@ -150,4 +151,14 @@ func ExtractIcon(lpszExeFileName string, nIconIndex int) HICON {
 		uintptr(nIconIndex))
 
 	return HICON(ret)
+}
+
+//SHGetSpecialFolderPath 获取系统目录
+func SHGetSpecialFolderPath(ty int32) string {
+	buff := make([]uint16, 260)
+	r, _, _ := syscall.Syscall6(procSHGetSpecialFolderPathW.Addr(), 4, 0, uintptr(unsafe.Pointer(&buff[0])), uintptr(ty), 0, 0, 0)
+	if 1 != r {
+		return ""
+	}
+	return syscall.UTF16ToString(buff)
 }

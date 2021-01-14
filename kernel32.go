@@ -5,6 +5,7 @@
 package w32
 
 import (
+	"fmt"
 	"syscall"
 	"unsafe"
 )
@@ -49,6 +50,7 @@ var (
 	procReadProcessMemory          = modkernel32.NewProc("ReadProcessMemory")
 	procQueryPerformanceCounter    = modkernel32.NewProc("QueryPerformanceCounter")
 	procQueryPerformanceFrequency  = modkernel32.NewProc("QueryPerformanceFrequency")
+	procGetNativeSystemInfo        = modkernel32.NewProc("GetNativeSystemInfo")
 )
 
 func GetModuleHandle(modulename string) HINSTANCE {
@@ -305,6 +307,11 @@ func GetDiskFreeSpaceEx(dirName string) (r bool,
 		freeBytesAvailable, totalNumberOfBytes, totalNumberOfFreeBytes
 }
 
+//GetNativeSystemInfo ...
+func GetNativeSystemInfo(lpSystemInfo *SystemInfo) {
+	procGetNativeSystemInfo.Call(uintptr(unsafe.Pointer(lpSystemInfo)))
+}
+
 func GetSystemTime() *SYSTEMTIME {
 	var time SYSTEMTIME
 	procGetSystemTime.Call(
@@ -385,4 +392,13 @@ func QueryPerformanceFrequency() uint64 {
 	)
 
 	return result
+}
+
+//GetSystemVersion 系统版本
+func GetSystemVersion() string {
+	version, err := syscall.GetVersion()
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%d.%d (%d)", byte(version), uint8(version>>8), version>>16)
 }

@@ -199,3 +199,16 @@ func ComInvoke(disp *IDispatch, dispid int32, dispatch int16, params ...interfac
 	result = &ret
 	return
 }
+
+func stringToUTF16Ptr(s string) uintptr {
+	strp, _ := syscall.UTF16PtrFromString(s)
+	return uintptr(unsafe.Pointer(strp))
+}
+
+func spliceToPtr(data []byte) uintptr {
+	return uintptr(unsafe.Pointer(&data[0]))
+}
+
+func utf16SpliceToPtr(data []uint16) uintptr {
+	return uintptr(unsafe.Pointer(&data[0]))
+}
