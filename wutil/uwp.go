@@ -6,7 +6,6 @@ import (
 	"unsafe"
 
 	"github.com/yinyajiang/go-w32"
-	tools "github.com/yinyajiang/go-ytools/utils"
 )
 
 //UwpAppDesc ...
@@ -122,7 +121,7 @@ func loadUWPDescFromReg(name string) (bRet bool, desc UwpAppDesc) {
 
 	if len(desc.strDisplayName) > 0 {
 		desc.strExePath = desc.strWorkDir + "\\" + desc.strDisplayName + ".exe"
-		if !tools.IsExist(desc.strExePath) {
+		if !w32.IsExist(desc.strExePath) {
 			desc.strExePath = ""
 		}
 	}

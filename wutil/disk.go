@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 
 	"github.com/yinyajiang/go-w32"
-	tools "github.com/yinyajiang/go-ytools/utils"
 )
 
 //DiskStatus 磁盘信息
@@ -16,7 +15,7 @@ type DiskStatus struct {
 
 //DiskUsage 获取路径的磁盘信息
 func DiskUsage(path string) (disk DiskStatus, bret bool) {
-	vol := filepath.VolumeName(tools.AbsPath(path))
+	vol := filepath.VolumeName(w32.AbsPath(path))
 	b, freeBytesAvailable, totalNumberOfBytes, totalNumberOfFreeBytes := w32.GetDiskFreeSpaceEx(vol)
 
 	return DiskStatus{
@@ -26,7 +25,7 @@ func DiskUsage(path string) (disk DiskStatus, bret bool) {
 	}, b
 }
 
-//GetMaxPartition 获取最大分区
+//GetMaxFreePartition 获取最大分区
 func GetMaxFreePartition() (ret string) {
 	ps := w32.GetLogicalDriveStrings()
 	lastFree := uint64(0)
