@@ -45,3 +45,4 @@ var (
 	CSIDL_COMMON_ALTSTARTUP       int32 = 0x001e // non localized common startup
 	CSIDL_COMMON_FAVORITES        int32 = 0x001f
 )
+

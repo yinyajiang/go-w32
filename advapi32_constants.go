@@ -21,6 +21,11 @@ const (
 	KEY_SET_VALUE          = 0x0002
 	KEY_READ               = 0x20019
 	KEY_WRITE              = 0x20006
+
+	KEY_CREATE_LINK = 0x0020
+	KEY_WOW64_32KEY = 0x0200
+	KEY_WOW64_64KEY = 0x0100
+	KEY_WOW64_RES   = 0x0300
 )
 
 const (
@@ -167,7 +172,7 @@ const (
 	EVENT_TRACE_TYPE_CHECKPOINT            = 0x08
 	EVENT_TRACE_TYPE_SUSPEND               = 0x08
 	EVENT_TRACE_TYPE_WINEVT_SEND           = 0x09
-	EVENT_TRACE_TYPE_WINEVT_RECEIVE        = 0XF0
+	EVENT_TRACE_TYPE_WINEVT_RECEIVE        = 0xF0
 	TRACE_LEVEL_NONE                       = 0
 	TRACE_LEVEL_CRITICAL                   = 1
 	TRACE_LEVEL_FATAL                      = 1

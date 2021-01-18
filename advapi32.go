@@ -33,6 +33,7 @@ var (
 	procSetSecurityDescriptorDacl    = modadvapi32.NewProc("SetSecurityDescriptorDacl")
 	procStartService                 = modadvapi32.NewProc("StartServiceW")
 	procStartTrace                   = modadvapi32.NewProc("StartTraceW")
+	procRegQueryValueEx              = modadvapi32.NewProc("RegQueryValueExW")
 )
 
 var (
@@ -70,7 +71,8 @@ func RegOpenKeyEx(hKey HKEY, subKey string, samDesired uint32) HKEY {
 		uintptr(unsafe.Pointer(&result)))
 
 	if ret != ERROR_SUCCESS {
-		panic(fmt.Sprintf("RegOpenKeyEx(%d, %s, %d) failed", hKey, subKey, samDesired))
+		fmt.Printf("RegOpenKeyEx(%d, %s, %d) failed", hKey, subKey, samDesired)
+		return 0
 	}
 	return result
 }
@@ -120,6 +122,41 @@ func RegGetRaw(hKey HKEY, subKey string, value string) []byte {
 	}
 
 	return buf
+}
+
+//RegQueryValueEx ...
+func RegQueryValueEx(hKey HKEY, value string) (dataType int32, raw []byte) {
+	var bufLen uint32
+	var valptr unsafe.Pointer
+	if len(value) > 0 {
+		valptr = unsafe.Pointer(syscall.StringToUTF16Ptr(value))
+	}
+	procRegQueryValueEx.Call(
+		uintptr(hKey),
+		uintptr(valptr),
+		0,
+		uintptr(unsafe.Pointer(&dataType)),
+		0,
+		uintptr(unsafe.Pointer(&bufLen)))
+
+	if bufLen == 0 {
+		return 0, nil
+	}
+
+	buf := make([]byte, bufLen)
+	ret, _, _ := procRegGetValue.Call(
+		uintptr(hKey),
+		uintptr(valptr),
+		0,
+		uintptr(unsafe.Pointer(&dataType)),
+		uintptr(unsafe.Pointer(&buf[0])),
+		uintptr(unsafe.Pointer(&bufLen)))
+
+	if ret != ERROR_SUCCESS {
+		return 0, nil
+	}
+
+	return 0, buf
 }
 
 func RegSetBinary(hKey HKEY, subKey string, value []byte) (errno int) {

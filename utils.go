@@ -5,6 +5,7 @@
 package w32
 
 import (
+	"reflect"
 	"syscall"
 	"unicode/utf16"
 	"unsafe"
@@ -200,15 +201,29 @@ func ComInvoke(disp *IDispatch, dispid int32, dispatch int16, params ...interfac
 	return
 }
 
-func stringToUTF16Ptr(s string) uintptr {
+func StringToUTF16Ptr(s string) uintptr {
 	strp, _ := syscall.UTF16PtrFromString(s)
 	return uintptr(unsafe.Pointer(strp))
 }
 
-func spliceToPtr(data []byte) uintptr {
+func UTF16ByteToString(data []byte) string {
+	u16 := (*[1 << 30]uint16)(unsafe.Pointer(&data[0]))[0 : len(data)/2 : len(data)/2]
+	return syscall.UTF16ToString(u16)
+}
+
+func UTF16SpliceToString(data []uint16) string {
+	return syscall.UTF16ToString(data)
+}
+
+func SpliceToPtr(data []byte) uintptr {
 	return uintptr(unsafe.Pointer(&data[0]))
 }
 
-func utf16SpliceToPtr(data []uint16) uintptr {
+func Utf16SpliceToPtr(data []uint16) uintptr {
 	return uintptr(unsafe.Pointer(&data[0]))
+}
+
+func PrtIndex(p interface{}, index int) unsafe.Pointer {
+	size := reflect.TypeOf(p).Elem().Size()
+	return unsafe.Pointer(reflect.ValueOf(p).Pointer() + uintptr(int64(size)*int64(index)))
 }

@@ -14,12 +14,11 @@ var (
 	procGetFileVersionInfoW = modmswincore.NewProc("GetFileVersionInfoW")
 )
 
-
 //VerQueryValue windowsAPI
 func VerQueryValue(data []byte) *VsFIXEDFILEINFO {
 	var info *VsFIXEDFILEINFO
 	var bytes uint32
-	r, _, err := syscall.Syscall6(procVerQueryValueA.Addr(), 4, spliceToPtr(data), stringToUTF16Ptr("\\"), uintptr(unsafe.Pointer(&info)), uintptr(unsafe.Pointer(&bytes)), 0, 0)
+	r, _, err := syscall.Syscall6(procVerQueryValueA.Addr(), 4, SpliceToPtr(data), StringToUTF16Ptr("\\"), uintptr(unsafe.Pointer(&info)), uintptr(unsafe.Pointer(&bytes)), 0, 0)
 	if r != 1 {
 		fmt.Println(err)
 		return nil

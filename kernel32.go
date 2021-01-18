@@ -51,6 +51,12 @@ var (
 	procQueryPerformanceCounter    = modkernel32.NewProc("QueryPerformanceCounter")
 	procQueryPerformanceFrequency  = modkernel32.NewProc("QueryPerformanceFrequency")
 	procGetNativeSystemInfo        = modkernel32.NewProc("GetNativeSystemInfo")
+
+	procProcess32Next          = modkernel32.NewProc("Process32NextW")
+	procProcess32First         = modkernel32.NewProc("Process32FirstW")
+	procGetProcessId           = modkernel32.NewProc("GetProcessId")
+	procGetLogicalDriveStrings = modkernel32.NewProc("GetLogicalDriveStringsW")
+	procGetDriveType           = modkernel32.NewProc("GetDriveTypeW")
 )
 
 func GetModuleHandle(modulename string) HINSTANCE {
@@ -256,6 +262,52 @@ func Module32Next(snapshot HANDLE, me *MODULEENTRY32) bool {
 		uintptr(unsafe.Pointer(me)))
 
 	return ret != 0
+}
+
+func Process32First(hSnapshot HANDLE) (bret bool, ent PROCESSENTRY32) {
+	ent.DwSize = DWORD(unsafe.Sizeof(ent))
+	ret, _, _ := procProcess32First.Call(
+		uintptr(hSnapshot),
+		uintptr(unsafe.Pointer(&ent)))
+	bret = 0 != ret
+	return
+}
+
+func Process32Next(hSnapshot HANDLE) (bret bool, ent PROCESSENTRY32) {
+	ent.DwSize = DWORD(unsafe.Sizeof(ent))
+	ret, _, _ := procProcess32Next.Call(
+		uintptr(hSnapshot),
+		uintptr(unsafe.Pointer(&ent)))
+	bret = 0 != ret
+	return
+}
+
+func GetProcessId(hProcess HANDLE) (pid uint) {
+	ret, _, _ := procGetProcessId.Call(uintptr(hProcess))
+	pid = uint(ret)
+	return
+}
+
+func GetLogicalDriveStrings() (ret []string) {
+	var buff [MAX_PATH]uint16
+	res, _, _ := procGetLogicalDriveStrings.Call(uintptr(MAX_PATH), uintptr(Utf16SpliceToPtr(buff[:])))
+	if res == 0 {
+		return nil
+	}
+	for i := 0; ; {
+		if 0 == buff[i] {
+			break
+		}
+		v := UTF16SpliceToString(buff[i:])
+		ret = append(ret, v)
+		i += len(v) + 1
+	}
+	return
+}
+
+func GetDriveType(rootPathName string) uint {
+	ret, _, _ := procGetDriveType.Call(uintptr(StringToUTF16Ptr(rootPathName)))
+	return uint(ret)
 }
 
 func GetSystemTimes(lpIdleTime, lpKernelTime, lpUserTime *FILETIME) bool {

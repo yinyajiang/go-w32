@@ -181,6 +181,8 @@ type (
 	COLORREF        uint32
 	DWM_FRAME_COUNT uint64
 	DWORD           uint32
+	LONG            int32
+	ULONG           uint32
 	HACCEL          HANDLE
 	HANDLE          uintptr
 	HBITMAP         HANDLE
@@ -217,7 +219,8 @@ type (
 	ULONG_PTR       uintptr
 	WPARAM          uintptr
 	TRACEHANDLE     uintptr
-	LPWSTR          uintptr
+	LPWSTR          *uint16
+	LPCWSTR         *uint16
 )
 
 // http://msdn.microsoft.com/en-us/library/windows/desktop/dd162805.aspx
@@ -942,6 +945,40 @@ type INET_FIREWALL_APP_CONTAINER struct {
 	PackageFullName  LPWSTR
 }
 type PINET_FIREWALL_APP_CONTAINER = *INET_FIREWALL_APP_CONTAINER
+
+type PROCESSENTRY32 struct {
+	DwSize              DWORD
+	CntUsage            DWORD
+	Th32ProcessID       DWORD
+	Th32DefaultHeapID   ULONG_PTR
+	Th32ModuleID        DWORD
+	CntThreads          DWORD
+	Th32ParentProcessID DWORD
+	PcPriClassBase      LONG
+	DwFlags             DWORD
+	SzExeFile           [MAX_PATH]uint16
+}
+type PPROCESSENTRY32 = *PROCESSENTRY32
+type LPPROCESSENTRY32 = *PROCESSENTRY32
+
+type SHELLEXECUTEINFOW struct {
+	CbSize       DWORD     // in, required, sizeof of this structure
+	FMask        ULONG     // in, SEE_MASK_XXX values
+	Hwnd         HWND      // in, optional
+	LpVerb       LPCWSTR   // in, optional when unspecified the default verb is choosen
+	LpFile       LPCWSTR   // in, either this value or lpIDList must be specified
+	LpParameters LPCWSTR   // in, optional
+	LpDirectory  LPCWSTR   // in, optional
+	NShow        int32     // in, required
+	HInstApp     HINSTANCE // out when SEE_MASK_NOCLOSEPROCESS is specified
+	LpIDList     uintptr   // in, valid when SEE_MASK_IDLIST is specified, PCIDLIST_ABSOLUTE, for use with SEE_MASK_IDLIST & SEE_MASK_INVOKEIDLIST
+	LpClass      LPCWSTR   // in, valid when SEE_MASK_CLASSNAME is specified
+	HkeyClass    HKEY      // in, valid when SEE_MASK_CLASSKEY is specified
+	DwHotKey     DWORD     // in, valid when SEE_MASK_HOTKEY is specified
+	HMonitor     HANDLE
+	HProcess     HANDLE // out, valid when SEE_MASK_NOCLOSEPROCESS specified
+}
+type LPSHELLEXECUTEINFOW = *SHELLEXECUTEINFOW
 
 type HOOKPROC func(int, WPARAM, LPARAM) LRESULT
 

@@ -23,6 +23,7 @@ var (
 	procShellExecute            = modshell32.NewProc("ShellExecuteW")
 	procExtractIcon             = modshell32.NewProc("ExtractIconW")
 	procSHGetSpecialFolderPathW = modshell32.NewProc("SHGetSpecialFolderPathW")
+	procShellExecuteExW         = modshell32.NewProc("ShellExecuteExW")
 )
 
 func SHBrowseForFolder(bi *BROWSEINFO) uintptr {
@@ -151,6 +152,11 @@ func ExtractIcon(lpszExeFileName string, nIconIndex int) HICON {
 		uintptr(nIconIndex))
 
 	return HICON(ret)
+}
+
+func ShellExecuteEx(pExecInfo *SHELLEXECUTEINFOW) bool {
+	ret, _, _ := procShellExecuteExW.Call(uintptr(unsafe.Pointer(pExecInfo)))
+	return ret == 1
 }
 
 //SHGetSpecialFolderPath 获取系统目录
