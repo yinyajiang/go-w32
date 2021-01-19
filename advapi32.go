@@ -130,12 +130,18 @@ func RegGetRaw(hKey HKEY, subKey string, value string, flags uint32) (uint32, []
 }
 
 func RegGetRawAll(hKey HKEY, subKey string, value string) (uint32, []byte) {
-	if 32 == GetSysBit() {
-		return RegGetRaw(hKey, subKey, value, RRF_RT_ANY)
-	}
 	t, d := RegGetRaw(hKey, subKey, value, RRF_RT_ANY)
 	if t != 0 {
 		return t, d
+	}
+
+	if 32 == GetSysBit() {
+		return 0, nil
+	}
+
+	bit := 32 << (^uint(0) >> 63)
+	if 32 == bit {
+		return RegGetRaw(hKey, subKey, value, RRF_RT_ANY|RRF_SUBKEY_WOW6464KEY)
 	}
 	return RegGetRaw(hKey, subKey, value, RRF_RT_ANY|RRF_SUBKEY_WOW6432KEY)
 }
