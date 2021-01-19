@@ -201,6 +201,16 @@ func ComInvoke(disp *IDispatch, dispid int32, dispatch int16, params ...interfac
 	return
 }
 
+//GetSysBit 获取当前位数
+func GetSysBit() int {
+	var si SystemInfo
+	GetNativeSystemInfo(&si)
+	if si.ProcessorArchitecture == 6 || si.ProcessorArchitecture == 9 {
+		return 64
+	}
+	return 32
+}
+
 func StringToUTF16Ptr(s string) uintptr {
 	strp, _ := syscall.UTF16PtrFromString(s)
 	return uintptr(unsafe.Pointer(strp))

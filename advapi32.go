@@ -88,40 +88,56 @@ func RegCloseKey(hKey HKEY) error {
 	return err
 }
 
-func RegGetRaw(hKey HKEY, subKey string, value string) []byte {
+func RegGetRaw(hKey HKEY, subKey string, value string, flags uint32) (uint32, []byte) {
 	var bufLen uint32
 	var valptr unsafe.Pointer
+	var subkeyptr unsafe.Pointer
 	if len(value) > 0 {
 		valptr = unsafe.Pointer(syscall.StringToUTF16Ptr(value))
 	}
+	if len(subKey) > 0 {
+		subkeyptr = unsafe.Pointer(syscall.StringToUTF16Ptr(subKey))
+	}
 	procRegGetValue.Call(
 		uintptr(hKey),
-		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(subKey))),
+		uintptr(subkeyptr),
 		uintptr(valptr),
-		uintptr(RRF_RT_ANY),
+		uintptr(flags),
 		0,
 		0,
 		uintptr(unsafe.Pointer(&bufLen)))
 
 	if bufLen == 0 {
-		return nil
+		return 0, nil
 	}
 
+	var ty uint32
 	buf := make([]byte, bufLen)
 	ret, _, _ := procRegGetValue.Call(
 		uintptr(hKey),
-		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(subKey))),
+		uintptr(subkeyptr),
 		uintptr(valptr),
-		uintptr(RRF_RT_ANY),
-		0,
+		uintptr(flags),
+		uintptr(unsafe.Pointer(&ty)),
 		uintptr(unsafe.Pointer(&buf[0])),
 		uintptr(unsafe.Pointer(&bufLen)))
 
 	if ret != ERROR_SUCCESS {
-		return nil
+		return 0, nil
 	}
 
-	return buf
+	return ty, buf
+}
+
+func RegGetRawAll(hKey HKEY, subKey string, value string) (uint32, []byte) {
+	if 32 == GetSysBit() {
+		return RegGetRaw(hKey, subKey, value, RRF_RT_ANY)
+	}
+	t, d := RegGetRaw(hKey, subKey, value, RRF_RT_ANY)
+	if t != 0 {
+		return t, d
+	}
+	return RegGetRaw(hKey, subKey, value, RRF_RT_ANY|RRF_SUBKEY_WOW6432KEY)
 }
 
 //RegQueryValueEx ...

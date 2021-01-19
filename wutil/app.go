@@ -10,6 +10,13 @@ import (
 func LoadAppList() (ret map[string]string) {
 	ret = make(map[string]string, 0)
 	_load := func(mask uint32) {
+		var rtmask uint32
+		if 0 != mask&w32.KEY_WOW64_64KEY {
+			rtmask |= w32.RRF_SUBKEY_WOW6464KEY
+		} else if 0 != mask&w32.KEY_WOW64_32KEY {
+			rtmask |= w32.RRF_SUBKEY_WOW6432KEY
+		}
+
 		path := "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall"
 		hUnistall := w32.RegOpenKeyEx(w32.HKEY_LOCAL_MACHINE, path, mask)
 		if hUnistall != 0 {
@@ -27,13 +34,13 @@ func LoadAppList() (ret map[string]string) {
 				packageName = ""
 			}
 
-			wzBuff := w32.RegGetRaw(w32.HKEY_LOCAL_MACHINE, fullpath, "DisplayName")
+			_, wzBuff := w32.RegGetRaw(w32.HKEY_LOCAL_MACHINE, fullpath, "DisplayName", w32.RRF_RT_ANY|rtmask)
 			if len(wzBuff) != 0 {
 				packageName = w32.UTF16ByteToString(wzBuff)
 			}
 
 			installLocation := ""
-			wzBuff = w32.RegGetRaw(w32.HKEY_LOCAL_MACHINE, fullpath, "InstallLocation")
+			_, wzBuff = w32.RegGetRaw(w32.HKEY_LOCAL_MACHINE, fullpath, "InstallLocation", w32.RRF_RT_ANY|rtmask)
 			if len(wzBuff) != 0 {
 				installLocation = w32.UTF16ByteToString(wzBuff)
 			}
@@ -43,7 +50,7 @@ func LoadAppList() (ret map[string]string) {
 			ret[packageName] = installLocation
 		}
 	}
-	if 32 == GetSysBit() {
+	if 32 == w32.GetSysBit() {
 		_load(w32.KEY_READ)
 	} else {
 		_load(w32.KEY_READ | w32.KEY_WOW64_64KEY)

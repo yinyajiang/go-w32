@@ -10,12 +10,12 @@ import (
 
 //UwpAppDesc ...
 type UwpAppDesc struct {
-	strWorkDir       string
-	strContainerName string
-	strDisplayName   string
-	strPackageName   string
-	strDesc          string
-	strExePath       string
+	WorkDir       string
+	ContainerName string
+	DisplayName   string
+	PackageName   string
+	Desc          string
+	ExePath       string
 }
 
 //LoadUWPDesc ...
@@ -26,7 +26,7 @@ func LoadUWPDesc(name string) (bret bool, desc UwpAppDesc) {
 		}
 	}(name)
 
-	if !IsHightWin10() {
+	if !w32.IsHightWin10() {
 		return
 	}
 
@@ -52,15 +52,15 @@ func LoadUWPDesc(name string) (bret bool, desc UwpAppDesc) {
 			continue
 		}
 
-		desc.strWorkDir = w32.UTF16PtrToString(publicAppCs.WorkingDirectory)
-		desc.strContainerName = w32.UTF16PtrToString(publicAppCs.AppContainerName)
-		desc.strDisplayName = w32.UTF16PtrToString(publicAppCs.DisplayName)
-		desc.strPackageName = w32.UTF16PtrToString(publicAppCs.PackageFullName)
-		desc.strDesc = w32.UTF16PtrToString(publicAppCs.Description)
-		if strings.HasSuffix(desc.strWorkDir, "/") || strings.HasSuffix(desc.strWorkDir, `\`) {
-			desc.strWorkDir = desc.strWorkDir[0 : len(desc.strWorkDir)-1]
+		desc.WorkDir = w32.UTF16PtrToString(publicAppCs.WorkingDirectory)
+		desc.ContainerName = w32.UTF16PtrToString(publicAppCs.AppContainerName)
+		desc.DisplayName = w32.UTF16PtrToString(publicAppCs.DisplayName)
+		desc.PackageName = w32.UTF16PtrToString(publicAppCs.PackageFullName)
+		desc.Desc = w32.UTF16PtrToString(publicAppCs.Description)
+		if strings.HasSuffix(desc.WorkDir, "/") || strings.HasSuffix(desc.WorkDir, `\`) {
+			desc.WorkDir = desc.WorkDir[0 : len(desc.WorkDir)-1]
 		}
-		desc.strExePath = desc.strWorkDir + `\` + desc.strDisplayName + ".exe"
+		desc.ExePath = desc.WorkDir + `\` + desc.DisplayName + ".exe"
 		bret = true
 		break
 	}
@@ -78,7 +78,7 @@ func loadUWPDescFromReg(name string) (bRet bool, desc UwpAppDesc) {
 		return
 	}
 	defer w32.RegCloseKey(hMainKey)
-	sys := "x" + strconv.Itoa(GetSysBit())
+	sys := "x" + strconv.Itoa(w32.GetSysBit())
 	subpath := ""
 	for dwIndex := 0; ; dwIndex++ {
 		val := w32.RegEnumKeyEx(hMainKey, uint32(dwIndex))
@@ -99,30 +99,30 @@ func loadUWPDescFromReg(name string) (bRet bool, desc UwpAppDesc) {
 	}
 
 	fullRegPath := strRegPath + "\\" + subpath
-	wzBuff := w32.RegGetRaw(hRootKey, fullRegPath, "PackageID")
+	_, wzBuff := w32.RegGetRawAll(hRootKey, fullRegPath, "PackageID")
 	if len(wzBuff) > 0 {
-		desc.strPackageName = w32.UTF16ByteToString(wzBuff)
+		desc.PackageName = w32.UTF16ByteToString(wzBuff)
 	} else {
-		desc.strPackageName = subpath
+		desc.PackageName = subpath
 	}
 
-	wzBuff = w32.RegGetRaw(hRootKey, fullRegPath, "DisplayName")
+	_, wzBuff = w32.RegGetRawAll(hRootKey, fullRegPath, "DisplayName")
 	if len(wzBuff) > 0 {
-		desc.strDisplayName = w32.UTF16ByteToString(wzBuff)
-		desc.strDesc = desc.strDisplayName
+		desc.DisplayName = w32.UTF16ByteToString(wzBuff)
+		desc.Desc = desc.DisplayName
 	}
 
-	wzBuff = w32.RegGetRaw(hRootKey, fullRegPath, "PackageRootFolder")
+	_, wzBuff = w32.RegGetRawAll(hRootKey, fullRegPath, "PackageRootFolder")
 	if len(wzBuff) > 0 {
-		desc.strWorkDir = w32.UTF16ByteToString(wzBuff)
+		desc.WorkDir = w32.UTF16ByteToString(wzBuff)
 	} else {
 		return
 	}
 
-	if len(desc.strDisplayName) > 0 {
-		desc.strExePath = desc.strWorkDir + "\\" + desc.strDisplayName + ".exe"
-		if !w32.IsExist(desc.strExePath) {
-			desc.strExePath = ""
+	if len(desc.DisplayName) > 0 {
+		desc.ExePath = desc.WorkDir + "\\" + desc.DisplayName + ".exe"
+		if !w32.IsExist(desc.ExePath) {
+			desc.ExePath = ""
 		}
 	}
 	bRet = true

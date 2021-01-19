@@ -34,3 +34,9 @@ func IsExist(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
 }
+
+//IsHightWin10 ...
+func IsHightWin10() bool {
+	major, _, _ := RtlGetNtVersionNumbers()
+	return major >= 10
+}
