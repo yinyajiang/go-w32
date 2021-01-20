@@ -305,3 +305,99 @@ const (
 	EVENT_TRACE_CONTROL_UPDATE             = 2
 	EVENT_TRACE_CONTROL_FLUSH              = 3
 )
+
+const (
+	TOKEN_ASSIGN_PRIMARY    = 0x0001
+	TOKEN_DUPLICATE         = 0x0002
+	TOKEN_IMPERSONATE       = 0x0004
+	TOKEN_QUERY             = 0x0008
+	TOKEN_QUERY_SOURCE      = 0x0010
+	TOKEN_ADJUST_PRIVILEGES = 0x0020
+	TOKEN_ADJUST_GROUPS     = 0x0040
+	TOKEN_ADJUST_DEFAULT    = 0x0080
+	TOKEN_ADJUST_SESSIONID  = 0x0100
+
+	TOKEN_ALL_ACCESS_P = (STANDARD_RIGHTS_REQUIRED |
+		TOKEN_ASSIGN_PRIMARY |
+		TOKEN_DUPLICATE |
+		TOKEN_IMPERSONATE |
+		TOKEN_QUERY |
+		TOKEN_QUERY_SOURCE |
+		TOKEN_ADJUST_PRIVILEGES |
+		TOKEN_ADJUST_GROUPS |
+		TOKEN_ADJUST_DEFAULT)
+	TOKEN_ALL_ACCESS = (TOKEN_ALL_ACCESS_P | TOKEN_ADJUST_SESSIONID)
+)
+
+const (
+	TokenUser = iota + 1
+	TokenGroups
+	TokenPrivileges
+	TokenOwner
+	TokenPrimaryGroup
+	TokenDefaultDacl
+	TokenSource
+	TokenType
+	TokenImpersonationLevel
+	TokenStatistics
+	TokenRestrictedSids
+	TokenSessionId
+	TokenGroupsAndPrivileges
+	TokenSessionReference
+	TokenSandBoxInert
+	TokenAuditPolicy
+	TokenOrigin
+	TokenElevationType
+	TokenLinkedToken
+	TokenElevation
+	TokenHasRestrictions
+	TokenAccessInformation
+	TokenVirtualizationAllowed
+	TokenVirtualizationEnabled
+	TokenIntegrityLevel
+	TokenUIAccess
+	TokenMandatoryPolicy
+	TokenLogonSid
+	TokenIsAppContainer
+	TokenCapabilities
+	TokenAppContainerSid
+	TokenAppContainerNumber
+	TokenUserClaimAttributes
+	TokenDeviceClaimAttributes
+	TokenRestrictedUserClaimAttributes
+	TokenRestrictedDeviceClaimAttributes
+	TokenDeviceGroups
+	TokenRestrictedDeviceGroups
+	TokenSecurityAttributes
+	TokenIsRestricted
+	TokenProcessTrustLevel
+	TokenPrivateNameSpace
+	TokenSingletonAttributes
+	TokenBnoIsolation
+	TokenChildProcessFlags
+	TokenIsLessPrivilegedAppContainer
+	MaxTokenInfoClass
+)
+
+const (
+	TokenPrimary = iota + 1
+	TokenImpersonation
+)
+
+const (
+	STARTF_USESHOWWINDOW    = 0x00000001
+	STARTF_USESIZE          = 0x00000002
+	STARTF_USEPOSITION      = 0x00000004
+	STARTF_USECOUNTCHARS    = 0x00000008
+	STARTF_USEFILLATTRIBUTE = 0x00000010
+	STARTF_RUNFULLSCREEN    = 0x00000020 // ignored for non-x86 platforms
+	STARTF_FORCEONFEEDBACK  = 0x00000040
+	STARTF_FORCEOFFFEEDBACK = 0x00000080
+	STARTF_USESTDHANDLES    = 0x00000100
+)
+
+const (
+	LOGON_WITH_PROFILE         = 0x00000001
+	LOGON_NETCREDENTIALS_ONLY  = 0x00000002
+	LOGON_ZERO_PASSWORD_BUFFER = 0x80000000
+)

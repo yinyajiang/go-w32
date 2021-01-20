@@ -6,6 +6,7 @@ package w32
 
 import (
 	"fmt"
+	"os"
 	"syscall"
 	"unsafe"
 )
@@ -57,6 +58,7 @@ var (
 	procGetProcessId           = modkernel32.NewProc("GetProcessId")
 	procGetLogicalDriveStrings = modkernel32.NewProc("GetLogicalDriveStringsW")
 	procGetDriveType           = modkernel32.NewProc("GetDriveTypeW")
+	procGetCurrentProcess      = modkernel32.NewProc("GetCurrentProcess")
 )
 
 func GetModuleHandle(modulename string) HINSTANCE {
@@ -308,6 +310,20 @@ func GetLogicalDriveStrings() (ret []string) {
 func GetDriveType(rootPathName string) uint {
 	ret, _, _ := procGetDriveType.Call(uintptr(StringToUTF16Ptr(rootPathName)))
 	return uint(ret)
+}
+
+func GetCurrentProcess() HANDLE {
+
+	h, _, _ := procGetCurrentProcess.Call()
+	if uint32(h) == INVALID_HANDLE_VALUE {
+		s := OpenProcess(PROCESS_ALL_ACCESS, false, uintptr(os.Getpid()))
+		if uint32(s) == INVALID_HANDLE_VALUE {
+			return 0
+		}
+		h = uintptr(s)
+	}
+	return HANDLE(h)
+
 }
 
 func GetSystemTimes(lpIdleTime, lpKernelTime, lpUserTime *FILETIME) bool {

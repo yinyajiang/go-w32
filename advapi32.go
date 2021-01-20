@@ -34,6 +34,10 @@ var (
 	procStartService                 = modadvapi32.NewProc("StartServiceW")
 	procStartTrace                   = modadvapi32.NewProc("StartTraceW")
 	procRegQueryValueEx              = modadvapi32.NewProc("RegQueryValueExW")
+	procOpenProcessToken             = modadvapi32.NewProc("OpenProcessToken")
+	procGetTokenInformation          = modadvapi32.NewProc("GetTokenInformation")
+	procDuplicateTokenEx             = modadvapi32.NewProc("DuplicateTokenEx")
+	procCreateProcessWithToken       = modadvapi32.NewProc("CreateProcessWithTokenW")
 )
 
 var (
@@ -86,6 +90,25 @@ func RegCloseKey(hKey HKEY) error {
 		err = errors.New("RegCloseKey failed")
 	}
 	return err
+}
+
+func RegSetRaw(hKey HKEY, valName string, flags uint32, value []byte) (errno int) {
+	var lptr, vptr unsafe.Pointer
+	if len(valName) > 0 {
+		lptr = unsafe.Pointer(syscall.StringToUTF16Ptr(valName))
+	}
+	if len(value) > 0 {
+		vptr = unsafe.Pointer(&value[0])
+	}
+	ret, _, _ := procRegSetValueEx.Call(
+		uintptr(hKey),
+		uintptr(lptr),
+		uintptr(0),
+		uintptr(flags),
+		uintptr(vptr),
+		uintptr(len(value)))
+
+	return int(ret)
 }
 
 func RegGetRaw(hKey HKEY, subKey string, value string, flags uint32) (uint32, []byte) {
@@ -181,23 +204,8 @@ func RegQueryValueEx(hKey HKEY, value string) (dataType int32, raw []byte) {
 	return 0, buf
 }
 
-func RegSetBinary(hKey HKEY, subKey string, value []byte) (errno int) {
-	var lptr, vptr unsafe.Pointer
-	if len(subKey) > 0 {
-		lptr = unsafe.Pointer(syscall.StringToUTF16Ptr(subKey))
-	}
-	if len(value) > 0 {
-		vptr = unsafe.Pointer(&value[0])
-	}
-	ret, _, _ := procRegSetValueEx.Call(
-		uintptr(hKey),
-		uintptr(lptr),
-		uintptr(0),
-		uintptr(REG_BINARY),
-		uintptr(vptr),
-		uintptr(len(value)))
-
-	return int(ret)
+func RegSetBinary(hKey HKEY, valName string, value []byte) (errno int) {
+	return RegSetRaw(hKey, valName, REG_BINARY, value)
 }
 
 func RegGetString(hKey HKEY, subKey string, value string) string {
@@ -230,6 +238,64 @@ func RegGetString(hKey HKEY, subKey string, value string) string {
 	}
 
 	return syscall.UTF16ToString(buf)
+}
+
+func OpenProcessToken(ProcessHandle HANDLE, DesiredAccess DWORD) (TokenHandle HANDLE) {
+	res, _, _ := procOpenProcessToken.Call(
+		uintptr(ProcessHandle),
+		uintptr(DesiredAccess),
+		uintptr(unsafe.Pointer(&TokenHandle)))
+	if 1 != res {
+		TokenHandle = 0
+	}
+	return
+}
+
+func GetTokenInformation(tokenHandle HANDLE, tokenInformationClass uint32, outinfo uintptr, inlen uint32) (outlen uint32) {
+	res, _, _ := procGetTokenInformation.Call(
+		uintptr(tokenHandle),
+		uintptr(tokenInformationClass),
+		outinfo,
+		uintptr(inlen),
+		uintptr(unsafe.Pointer(&outlen)))
+	if 1 != res {
+		outlen = 0
+	}
+	return
+}
+
+func DuplicateTokenEx(hExistingToken HANDLE, dwDesiredAccess uint32, impersonationLevel uint32, tokenType uint32) (newToken HANDLE) {
+	res, _, _ := procDuplicateTokenEx.Call(
+		uintptr(hExistingToken),
+		uintptr(dwDesiredAccess),
+		0,
+		uintptr(impersonationLevel),
+		uintptr(tokenType),
+		uintptr(unsafe.Pointer(&newToken)))
+	if 1 != res {
+		newToken = 0
+	}
+	return
+}
+
+func CreateProcessWithToken(hToken HANDLE, dwLogonFlags DWORD, cmd string, lpStartupInfo LPSTARTUPINFOW, lpProcessInformation LPPROCESS_INFORMATION) bool {
+
+	var lpCommandLine uintptr
+	if len(cmd) > 0 {
+		lpCommandLine = StringToUTF16Ptr(cmd)
+	}
+	res, _, _ := procCreateProcessWithToken.Call(
+		uintptr(hToken),
+		uintptr(dwLogonFlags),
+		uintptr(0),
+		lpCommandLine,
+		uintptr(0),
+		uintptr(0),
+		uintptr(0),
+		uintptr(unsafe.Pointer(lpStartupInfo)),
+		uintptr(unsafe.Pointer(lpProcessInformation)))
+
+	return 1 == res
 }
 
 /*

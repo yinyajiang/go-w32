@@ -64,6 +64,23 @@ func StartAdminProcess(path string, arg []string) (pid uint) {
 	return
 }
 
+//StartTokenProcess ...
+func StartTokenProcess(hPtoken w32.HANDLE, cmd string) (pid uint) {
+	if 0 == hPtoken {
+		return 0
+	}
+
+	var si w32.STARTUPINFOW
+	si.Cb = uint32(unsafe.Sizeof(si))
+	si.Flags = w32.STARTF_USESHOWWINDOW
+	si.ShowWindow = w32.SW_HIDE
+	var pi w32.PROCESS_INFORMATION
+	if w32.CreateProcessWithToken(hPtoken, w32.LOGON_WITH_PROFILE, cmd, &si, &pi) {
+		pid = w32.GetProcessId(pi.Process)
+	}
+	return
+}
+
 //ProcessWalk 遍历进程表
 func ProcessWalk(fun func(w32.PROCESSENTRY32) bool) {
 	hToolhelp := w32.CreateToolhelp32Snapshot(w32.TH32CS_SNAPPROCESS, 0)

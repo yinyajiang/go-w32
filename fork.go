@@ -43,22 +43,20 @@ var (
 	procResumeThread        = modkernel32.NewProc("ResumeThread")
 )
 
-func OpenProcess(desiredAccess int, inheritHandle bool, processId uintptr) (h HANDLE, e error) {
+func OpenProcess(desiredAccess int, inheritHandle bool, processId uintptr) (h HANDLE) {
 	inherit := uintptr(0)
 	if inheritHandle {
 		inherit = 1
 	}
 
-	ret, _, lastErr := procOpenProcess.Call(
+	ret, _, _ := procOpenProcess.Call(
 		uintptr(desiredAccess),
 		inherit,
 		uintptr(processId),
 	)
-
-	if ret == 0 {
-		e = lastErr
+	if uint32(ret) == INVALID_HANDLE_VALUE {
+		ret = 0
 	}
-
 	h = HANDLE(ret)
 	return
 }

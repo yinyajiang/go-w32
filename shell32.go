@@ -7,6 +7,7 @@ package w32
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"syscall"
 	"unsafe"
 )
@@ -160,11 +161,13 @@ func ShellExecuteEx(pExecInfo *SHELLEXECUTEINFOW) bool {
 }
 
 //SHGetSpecialFolderPath 获取系统目录
-func SHGetSpecialFolderPath(ty int32) string {
+func SHGetSpecialFolderPath(ty int32) (ret string) {
 	buff := make([]uint16, 260)
 	r, _, _ := syscall.Syscall6(procSHGetSpecialFolderPathW.Addr(), 4, 0, uintptr(unsafe.Pointer(&buff[0])), uintptr(ty), 0, 0, 0)
 	if 1 != r {
 		return ""
 	}
-	return syscall.UTF16ToString(buff)
+	ret = syscall.UTF16ToString(buff)
+	ret = strings.ReplaceAll(ret, "\\", "/")
+	return
 }

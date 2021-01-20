@@ -114,8 +114,8 @@ var (
 	procUnhookWindowsHookEx           = moduser32.NewProc("UnhookWindowsHookEx")
 	procCallNextHookEx                = moduser32.NewProc("CallNextHookEx")
 	procSetForegroundWindow           = moduser32.NewProc("SetForegroundWindow")
-	procFindWindowW                   = moduser32.NewProc("FindWindowW")
-	procFindWindowExW                 = moduser32.NewProc("FindWindowExW")
+	procFindWindow                    = moduser32.NewProc("FindWindowW")
+	procFindWindowEx                  = moduser32.NewProc("FindWindowExW")
 	procGetClassName                  = moduser32.NewProc("GetClassNameW")
 	procEnumChildWindows              = moduser32.NewProc("EnumChildWindows")
 	procSetTimer                      = moduser32.NewProc("SetTimer")
@@ -198,20 +198,32 @@ func CreateWindowEx(exStyle uint, className, windowName *uint16,
 	return HWND(ret)
 }
 
-func FindWindowExW(hwndParent, hwndChildAfter HWND, className, windowName *uint16) HWND {
-	ret, _, _ := procFindWindowExW.Call(
+func FindWindowEx(hwndParent, hwndChildAfter HWND, clsName, winname string) HWND {
+	var className, windowName uintptr
+	if len(clsName) > 0 {
+		className = StringToUTF16Ptr(clsName)
+	}
+	if len(winname) > 0 {
+		windowName = StringToUTF16Ptr(winname)
+	}
+	ret, _, _ := procFindWindowEx.Call(
 		uintptr(hwndParent),
 		uintptr(hwndChildAfter),
-		uintptr(unsafe.Pointer(className)),
-		uintptr(unsafe.Pointer(windowName)))
+		className,
+		windowName)
 
 	return HWND(ret)
 }
 
-func FindWindowW(className, windowName *uint16) HWND {
-	ret, _, _ := procFindWindowW.Call(
-		uintptr(unsafe.Pointer(className)),
-		uintptr(unsafe.Pointer(windowName)))
+func FindWindow(clsName, winname string) HWND {
+	var className, windowName uintptr
+	if len(clsName) > 0 {
+		className = StringToUTF16Ptr(clsName)
+	}
+	if len(winname) > 0 {
+		windowName = StringToUTF16Ptr(winname)
+	}
+	ret, _, _ := procFindWindow.Call(className, windowName)
 
 	return HWND(ret)
 }
@@ -519,8 +531,8 @@ func ReleaseCapture() bool {
 	return ret != 0
 }
 
-func GetWindowThreadProcessId(hwnd HWND) (HANDLE, int) {
-	var processId int
+func GetWindowThreadProcessId(hwnd HWND) (HANDLE, uint) {
+	var processId uint
 	ret, _, _ := procGetWindowThreadProcessId.Call(
 		uintptr(hwnd),
 		uintptr(unsafe.Pointer(&processId)))

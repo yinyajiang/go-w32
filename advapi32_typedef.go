@@ -120,3 +120,13 @@ type EVENT_TRACE_PROPERTIES struct {
 	LogFileNameOffset   uint32
 	LoggerNameOffset    uint32
 }
+
+type TOKEN_ELEVATION struct {
+	TokenIsElevated DWORD
+}
+type PTOKEN_ELEVATION = *TOKEN_ELEVATION
+
+
+
+
+

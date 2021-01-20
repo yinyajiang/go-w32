@@ -13,6 +13,8 @@ type PROCESS_INFORMATION struct {
 	ProcessId uint32
 	ThreadId  uint32
 }
+type PPROCESS_INFORMATION = *PROCESS_INFORMATION
+type LPPROCESS_INFORMATION = *PROCESS_INFORMATION
 
 // typedef struct _STARTUPINFOW {
 //   DWORD cb;
@@ -36,7 +38,7 @@ type PROCESS_INFORMATION struct {
 // } STARTUPINFOW, *LPSTARTUPINFOW;
 
 type STARTUPINFOW struct {
-	cb            uint32
+	Cb            uint32
 	_             *uint16
 	Desktop       *uint16
 	Title         *uint16
@@ -55,6 +57,7 @@ type STARTUPINFOW struct {
 	StdOutput     HANDLE
 	StdError      HANDLE
 }
+type LPSTARTUPINFOW = *STARTUPINFOW
 
 // combase!_SECURITY_ATTRIBUTES
 //    +0x000 nLength          : Uint4B

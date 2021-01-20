@@ -181,6 +181,7 @@ type (
 	COLORREF        uint32
 	DWM_FRAME_COUNT uint64
 	DWORD           uint32
+	WORD            uint16
 	LONG            int32
 	ULONG           uint32
 	HACCEL          HANDLE
@@ -219,6 +220,7 @@ type (
 	ULONG_PTR       uintptr
 	WPARAM          uintptr
 	TRACEHANDLE     uintptr
+	LPBYTE          *byte
 	LPWSTR          *uint16
 	LPCWSTR         *uint16
 )
