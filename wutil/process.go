@@ -40,7 +40,7 @@ func GetProcessPID(name string) (ret uint) {
 }
 
 //StartAdminProcess UAC启动
-func StartAdminProcess(path string, arg []string) (pid uint) {
+func StartAdminProcess(path string, arg []string) (pid uint, handle w32.HANDLE) {
 	path = strings.ReplaceAll(path, "/", "\\")
 	para := ""
 	if arg != nil {
@@ -60,6 +60,7 @@ func StartAdminProcess(path string, arg []string) (pid uint) {
 	shExecInfo.HInstApp = 0
 	if w32.ShellExecuteEx(&shExecInfo) {
 		pid = w32.GetProcessId(shExecInfo.HProcess)
+		handle = shExecInfo.HProcess
 	}
 	return
 }
