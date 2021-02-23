@@ -217,7 +217,7 @@ func StringToUTF16Ptr(s string) uintptr {
 }
 
 func UTF16ByteToString(data []byte) string {
-	u16 := (*[1 << 30]uint16)(unsafe.Pointer(&data[0]))[0 : len(data)/2 : len(data)/2]
+	u16 := (*[1 << 29]uint16)(unsafe.Pointer(&data[0]))[0 : len(data)/2 : len(data)/2]
 	return syscall.UTF16ToString(u16)
 }
 
