@@ -5,7 +5,6 @@
 package w32
 
 import (
-	"fmt"
 	"os"
 	"syscall"
 	"unsafe"
@@ -463,10 +462,10 @@ func QueryPerformanceFrequency() uint64 {
 }
 
 //GetSystemVersion 系统版本
-func GetSystemVersion() string {
+func GetSystemVersion() (m, j, n int) {
 	version, err := syscall.GetVersion()
 	if err != nil {
-		return ""
+		return
 	}
-	return fmt.Sprintf("%d.%d (%d)", byte(version), uint8(version>>8), version>>16)
+	return int(byte(version)), int(uint8(version >> 8)), int(version >> 16)
 }
